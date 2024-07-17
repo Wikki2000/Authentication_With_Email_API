@@ -6,7 +6,7 @@ The primary functionality includes sending a confirmation code to the user's ema
 ## Request Body:
 
 ```python
-POST /api/send-confirmation-code
+[POST] /api/send-confirmation-code
 Content-Type: application/json
 {
     "email": "user@example.com"
