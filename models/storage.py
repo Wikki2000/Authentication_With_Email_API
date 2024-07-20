@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from os import getenv
 
+
 class Storage:
     """ Defines storage model using SQLAlchemy. """
     __session = None
@@ -17,7 +18,8 @@ class Storage:
         database = getenv('DATABASE')
 
         if not username or not password:
-            raise ValueError('Environment variables must be set for database URL')
+            error = "Environment variables must be set for database URL"
+            raise ValueError(error)
 
         url = f'postgresql://{username}:{password}@localhost:5432/{database}'
         self.__engine = create_engine(url, pool_pre_ping=True)
