@@ -3,8 +3,8 @@ This documentation outlines the API endpoints used for user authentication throu
 
 # [POST] /api/auth/send-confirmation-code
 The primary functionality includes sending a confirmation code to the user's email to verify their identity. Below are the details for each endpoint, including request and response formats.
-## Request Body:
 
+## Request Body:
 ```python
 [POST] /api/send-confirmation-code
 Content-Type: application/json
@@ -20,6 +20,7 @@ Content-Type: application/json
 {
     "status": "success",
     "message": "Confirmation code sent to email",
+    "token": "12345",
     "status_code": 200
 }
 ```
@@ -43,3 +44,5 @@ Content-Type: application/json
 ```
 
 # [POST] /api/auth/register
+The primary functionality of this endpoint includes registering a new user after verifying their email with a token. Below are the details for the request and response formats:
+## Request Body:

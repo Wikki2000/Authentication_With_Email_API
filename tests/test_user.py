@@ -2,12 +2,12 @@
 """ Test the user module """
 from models.user import User
 from models.storage import Storage
-import unittest 
+import unittest
 
 
 class TestUser(unittest.TestCase):
     """ Models test cases for User class. """
-    
+
     def setUp(self):
         """ Set up the test environment. """
         self.user_data = {"first_name": "test_name",
@@ -42,10 +42,12 @@ class TestUser(unittest.TestCase):
                 email=self.user_data["email"]).first()
         self.assertIsInstance(user, User)
 
-    def test_close(self):
-        """ Test that session is close successfully."""
-        self.obj.close()
-        self.assertIsNone(self.session)
+    def test_hash_password_and_check_password(self):
+        """ Test that password is correctly hash and verify. """
+        self.obj.hash_password()
+        state = self.obj.check_password(self.user_data["password"])
+        self.assertTrue(state)
+
 
 if __name__ == "__main__":
     unittest.main()

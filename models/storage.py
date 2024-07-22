@@ -52,6 +52,10 @@ class Storage:
         """ Commit change to database """
         self.__session.commit()
 
+    def delete(self, obj):
+        """ Delete an instance of a class. """
+        self.__session.delete(obj)
+
     def close(self):
         """ Close database session. """
         self.__session.close()

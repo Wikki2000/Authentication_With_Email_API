@@ -63,8 +63,9 @@ class TestStorage(unittest.TestCase):
         self.session.commit()
 
         # Retrieving a user that exists
-        retrieved_user = self.storage_obj.get_by_email(User,
-                self.user_data["email"])
+        retrieved_user = self.storage_obj.get_by_email(
+                User, self.user_data["email"]
+        )
         self.assertIsInstance(retrieved_user, User)
 
         # Retrieving non-existence user
@@ -75,6 +76,7 @@ class TestStorage(unittest.TestCase):
         """ Test if session is successfully close. """
         self.storage_obj.close()
         self.assertIsNotNone(self.session)
+
 
 if __name__ == '__main__':
     unittest.main()

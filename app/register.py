@@ -6,6 +6,7 @@ from models.storage import Storage
 from models.user import User
 from secrets import randbelow
 import sib_api_v3_sdk
+from sqlalchemy.exc import IntegrityError
 from os import getenv
 from redis import Redis
 
@@ -43,10 +44,71 @@ def sent_confirmation_code():
     recipient = {"name": name, "email": email}
     response = send_token(token, "app/email_content.html", **recipient)
     if response:
-        return jsonify({"status": "Success",
+        return jsonify({"status": "Success", "token": token,
                         "message": "Confirmation code sent to email"}), 200
     return jsonify({"status": "Error",
                     "message": "Token delivery failed"}), 500
+
+
+@register_bp.route("/register", methods=['POST'])
+def register():
+    """ Store user credentials in database. """
+    data = request.get_json()
+
+    # Check for empty request body
+    if not data:
+        error = {"status": "Bad Request",
+                 "message": "Request body is empty"}
+        return jsonify(error), 400
+
+    # Check for password
+    required_field = ["first_name", "last_name", "email", "password", "token"]
+    for field in required_field:
+        if not data.get(field):
+            error = {"status": "Bad Request",
+                     "message": f"{field} field require"}
+            return jsonify(error), 400
+
+    # Check if token is valid
+    token = data.get("token")
+    retrieved_token = r.get(token)
+    if not retrieved_token:
+        error = {"status": "Validation Error",
+                 "message": "Invalid or expired token"}
+        return jsonify(error), 422
+
+    # Create an instance of User class
+    attribute = {"first_name": data.get("first_name"),
+                 "last_name": data.get("last_name"),
+                 "email": data.get("email"),
+                 "password": data.get("password")}
+    user = User(**attribute)
+    try:
+        if retrieved_token:
+            user.hash_password()
+            user.save()
+
+            # Delete token after confirmation
+            r.delete(token)
+
+            return jsonify({"status": "Success",
+                            "message": "Registration successfully",
+                            "data": {
+                                "id": user.id,
+                                "first_name": user.first_name,
+                                "last_name": user.last_name,
+                                "email": user.email,
+                                "password": user.password
+                                }
+                            }), 200
+    except IntegrityError:
+        session = Storage().get_session()
+        error = {"status": "Validation Error",
+                 "message": "Email is already registered"}
+        session.rollback()
+        return jsonify(error), 422
+    finally:
+        user.close()
 
 
 def generate_token():
@@ -55,6 +117,7 @@ def generate_token():
     expiring_time = timedelta(minutes=15)
 
     # Save token to redis db and delete when expiring time ellapsed
+    # The key of this token is the token itself
     r.setex(token, expiring_time, "valid")
     return token
 
